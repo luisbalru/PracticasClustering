@@ -54,3 +54,14 @@ plotcluster(personal,grupo2)
 shi2 = silhouette(grupo2,dista)
 plot(shi2,col=1:3)
 cluster.stats(dista,grupo2)
+
+# TODOS LOS DATOS JUNTOS. INTENTANDO PREDECIR IMPAGO
+kmeans.result3=kmeans(bankloan_nna,2)
+kmeans.result3
+table(personal$bankloan_nna.impago,kmeans.result3$cluster)
+plot(bankloan_nna[c("ingresos","deudaingr")], col=kmeans.result3$cluster)
+points(kmeans.resul3t$centers[,c("ingresos","deudaingr")],col=1:3,pch=8,cex=2)
+x3=kmeans.result3$cluster
+plotcluster(bankloan_nna,x3)
+shi3= silhouette(kmeans.result3$cluster,dist(bankloan_nna))
+plot(shi3)
