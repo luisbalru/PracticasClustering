@@ -65,3 +65,17 @@ x3=kmeans.result3$cluster
 plotcluster(bankloan_nna,x3)
 shi3= silhouette(kmeans.result3$cluster,dist(bankloan_nna))
 plot(shi3)
+
+# SOLO PERSONALES
+
+personal2 = personal
+personal2$bankloan_nna.impago = NULL
+kmeans.result.personales = kmeans(personal2,2)
+kmeans.result.personales
+table(personal$bankloan_nna.impago,kmeans.result.personales$cluster)
+plot(personal[c("bankloan_nna.edad","bankloan_nna.empleo")], col=kmeans.result.personales$cluster)
+plot(personal[c("bankloan_nna.edad","bankloan_nna.direccion")], col=kmeans.result.personales$cluster)
+xper=kmeans.result.personales$cluster
+plotcluster(personal2,xper)
+ship= silhouette(kmeans.result.personales$cluster,dist(personal2))
+plot(ship)
