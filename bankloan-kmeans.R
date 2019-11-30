@@ -11,27 +11,46 @@ library(fpc)
 bankloan = read.csv2("./data/bankloan-spss.csv",header=TRUE, sep=';')
 str(bankloan)
 
-x = data.frame(bankloan$edad,bankloan[,5:8],bankloan[,10:12])
-#x = x[1:700,]
-dist1=dist(x)
+# Hay muchos valores perdidos en la variable impago
+any(is.na(bankloan$impago))
 
-y=data.frame(bankloan[,2:4])
-View(y)
-dist2=dist(y,method="binary")
+#Me quedo con las instancias que no tienen NA
+bankloan_nna = bankloan[1:700,]
 
-dista=(dist1+dist2)/2
-kmeans.result=kmeans(dista,2)
-kmeans.result$centers
-grupo=kmeans.result$cluster
-#Analsis de bondad, restrinjo valores para dibujar
-idx=sample(1:dim(x)[1],250)
-plotcluster(x[idx,],grupo[idx])
-plotcluster(y[idx,],grupo[idx])
-d1=dist(x[idx,])
-d2=dist(y[idx,])
-d3=(d1+d2)/2
-shi= silhouette(grupo[idx],d3)
+# Divido el contenido en variables económicas y personales
+economia = data.frame(bankloan_nna$ingresos, bankloan_nna$deudaingr, bankloan_nna$deudacred,bankloan_nna$deudaotro, bankloan_nna$morapred1, bankloan_nna$morapred2, bankloan_nna$morapred3)
+personal = data.frame(bankloan_nna$edad,bankloan_nna$educ,bankloan_nna$empleo,bankloan_nna$direccion,bankloan_nna$impago)
+
+
+#normalizo las variables numéricas (economía)
+for (j in 1:7) {x=economia[,j] ; v=(x-mean(x))/sqrt(var(x)); economia[,j]=v}
+
+# cluster sobre la economía y con dos clusters
+kmeans.result=kmeans(economia,2)
+kmeans.result
+table(personal$bankloan_nna.impago,kmeans.result$cluster)
+#Analisis de bondad
+plot(economia[c("bankloan_nna.ingresos","bankloan_nna.deudaingr")], col=kmeans.result$cluster)
+points(kmeans.result$centers[,c("bankloan_nna.ingresos","bankloan_nna.deudaingr")],col=1:3,pch=8,cex=2)
+x=kmeans.result$cluster
+plotcluster(economia,x)
+shi= silhouette(kmeans.result$cluster,dist(economia))
 plot(shi,col=1:3)
-cluster.stats(dista,grupo)
+#Calculo de algunas otras medidas de bondad del agrupamiento
+#(Ver descripcion de la funcion)
+group=kmeans.result$cluster
+cluster.stats(dist(economia),group,alt.clustering=personal$bankloan_nna.impago)
 
-
+# CON VARIABLES NUMÉRICAS Y CATEGÓRICAS
+# Defino las distancias
+dist1 = dist(economia)
+dist2 = dist(personal)
+dista = (dist1+dist2)/2
+kmeans.result2=kmeans(dista,2)
+kmeans.result2$centers
+grupo2=kmeans.result2$cluster
+plotcluster(economia,grupo2)
+plotcluster(personal,grupo2)
+shi2 = silhouette(grupo2,dista)
+plot(shi2,col=1:3)
+cluster.stats(dista,grupo2)
